@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+    
+    # This service does not have its own image,
+    # configuration is sufficiend for develepment purpouses.
+    dev:
+        container_name: docker_react_vite_template_dev
+        build:
+            context: .
+            dockerfile: Dockerfile
+        working_dir: /app
+        user: node
+        volumes:
+            - .:/app/
+        tty: true
+        ports:
+            - ${DEV_PORT}:3000
+        # command: sh -c "pnpm install && pnpm run dev --host"
+        environment:
+            - VITE_APP_API_URL=${DEV_API_URL}
+            - VITE_APP_LOG_LEVEL={$DEV_LOG_LEVEL}
+            - VITE_APP_PUBLIC_URL=${DEV_PUBLIC_URL}
+            - GENERATE_SOURCEMAP=${DEV_GENERATE_SOPURCE_MAP}
+    
+    # This service builds release image and runs container for.
+    # Command:
+    #   docker compose up release
+    release:
+        profiles: ["release"] # do not run by default
+        container_name: docker_react_vite_template_release
+        build:
+            context: .
+            dockerfile: Dockerfile
+        tty: true
+        command: sh -c "pnpm install && pnpm run build && pnpm run preview --host"
+        volumes:
+            - .:/app/
+        working_dir: /app
+        ports:
+            - ${RELEASE_PORT}:4000
+        environment:
+            - VITE_APP_API_URL=${RELEASE_API_URL}
+            - VITE_APP_LOG_LEVEL={$RELEASE_LOG_LEVEL}
+            - VITE_APP_PUBLIC_URL=${RELEASE_PUBLIC_URL}
+            - GENERATE_SOURCEMAP=${RELEASE_GENERATE_SOPURCE_MAP}
+    
+    # This service is mend to run build script using docker generating project files
+    # optimized for release in build directory.
+    # To release build run this command: `docker compose run --rm build`
+    # after that build release image using `release` service (see above).
+    build:
+        extends:
+            service: dev
+        profiles: ["build"] # do not run by default
+        container_name: docker_react_vite_template_build
+        tty: false
+        command: pnpm run build
+        environment:
+            - VITE_APP_API_URL=${RELEASE_API_URL}
+            - VITE_APP_LOG_LEVEL={$RELEASE_LOG_LEVEL}
+            - VITE_APP_PUBLIC_URL=${RELEASE_PUBLIC_URL}
+            - GENERATE_SOURCEMAP=${RELEASE_GENERATE_SOPURCE_MAP}
