@@ -1,4 +1,7 @@
-import { ColorScheme, MantineProvider, Text } from '@mantine/core';
+import {
+    Center,
+    ColorScheme, MantineProvider, Stack, Text,
+} from '@mantine/core';
 import { useState } from 'react';
 import ThemeSwitch from './ThemeSwitch';
 
@@ -17,8 +20,12 @@ export default function App() {
                 }),
             }}
         >
-            <Text>Welcome to Mantine!</Text>
-            <ThemeSwitch colorScheme={colorScheme} setColorScheme={setColorScheme} />
+            <Center mt={50}>
+                <Stack>
+                    <Text>Welcome to Mantine!</Text>
+                    <ThemeSwitch colorScheme={colorScheme} setColorScheme={setColorScheme} />
+                </Stack>
+            </Center>
         </MantineProvider>
     );
 }
